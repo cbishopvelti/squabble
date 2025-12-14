@@ -106,6 +106,12 @@ defmodule Squabble.Server do
           "Someone already won this round, not starting"
         end, type: :squabble)
 
+        Enum.each(winner_subscriptions(state), fn module ->
+          if function_exported?(module, :not_leader, 1) do
+            module.not_leader(state.term)
+          end
+        end)
+
         {:ok, state}
 
       {:error, :older} ->

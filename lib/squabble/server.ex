@@ -82,9 +82,10 @@ defmodule Squabble.Server do
       "Starting an election for term #{term}, announcing candidacy"
     end, type: :squabble)
 
+
     case check_term_newer(state, term) do
       {:ok, :newer} ->
-        if state.size == 1 do
+        if length(PG.members()) == 1 do
           voted_leader(state, 1)
         else
           PG.broadcast(fn pid ->
@@ -305,7 +306,11 @@ defmodule Squabble.Server do
   """
   @spec check_majority_votes(State.t()) :: {:ok, :majority} | {:error, :not_enough}
   def check_majority_votes(state) do
-    case length(state.votes) >= state.size / 2 do
+
+    current_size = length(PG.members())
+    current_size = if current_size < 1, do: 1, else: current_size
+
+    case length(state.votes) >= current_size / 2 do
       true ->
         {:ok, :majority}
 

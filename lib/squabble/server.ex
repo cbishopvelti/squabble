@@ -246,6 +246,10 @@ defmodule Squabble.Server do
         {:ok, state}
 
       _ ->
+        Enum.each(winner_subscriptions(state), fn module ->
+          module.not_leader(state.term)
+        end)
+
         {:ok, state}
     end
   end

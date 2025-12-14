@@ -188,6 +188,14 @@ defmodule Squabble.Server do
 
       :ets.insert(@key, {:is_leader?, false})
 
+      if leader_node != node() do
+        Enum.each(winner_subscriptions(state), fn module ->
+          if function_exported?(module, :not_leader, 1) do
+            module.not_leader(term)
+          end
+        end)
+      end
+
       state =
         state
         |> Map.put(:term, term)
@@ -246,10 +254,6 @@ defmodule Squabble.Server do
         {:ok, state}
 
       _ ->
-        Enum.each(winner_subscriptions(state), fn module ->
-          module.not_leader(state.term)
-        end)
-
         {:ok, state}
     end
   end
@@ -388,5 +392,10 @@ defmodule Squabble.Server do
       _ ->
         {:ok, state}
     end
+  end
+
+  @impl true
+  def not_leader(_term) do
+    :ok
   end
 end

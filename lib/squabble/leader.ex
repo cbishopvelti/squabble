@@ -15,5 +15,13 @@ defmodule Squabble.Leader do
   """
   @callback node_down() :: :ok
 
+  @doc """
+  Callback if we're not the leader
+  """
   @callback not_leader(election_term()) :: :ok
+
+  @doc"""
+  Callback on startup
+  """
+  @callback startup(election_term()) :: :ok
 end

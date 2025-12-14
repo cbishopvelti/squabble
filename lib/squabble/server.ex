@@ -56,6 +56,12 @@ defmodule Squabble.Server do
       Squabble.leader_check(pid)
     end)
 
+    Enum.each(winner_subscriptions(state), fn module ->
+        if function_exported?(module, :startup, 1) do
+          module.startup(state.term)
+        end
+      end)
+
     {:ok, state}
   end
 
@@ -118,6 +124,14 @@ defmodule Squabble.Server do
         Logger.debug(fn ->
           "This term has already completed, not starting"
         end, type: :squabble)
+
+        if state.state != "leader" do
+          Enum.each(winner_subscriptions(state), fn module ->
+            if function_exported?(module, :not_leader, 1) do
+              module.not_leader(state.term)
+            end
+          end)
+        end
 
         {:ok, state}
     end
@@ -402,6 +416,10 @@ defmodule Squabble.Server do
 
   @impl true
   def not_leader(_term) do
+    :ok
+  end
+  @impl true
+  def startup(_term) do
     :ok
   end
 end

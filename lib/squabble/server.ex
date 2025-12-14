@@ -57,10 +57,10 @@ defmodule Squabble.Server do
     end)
 
     Enum.each(winner_subscriptions(state), fn module ->
-        if function_exported?(module, :startup, 1) do
-          module.startup(state.term)
-        end
-      end)
+      if function_exported?(module, :startup, 1) do
+        module.startup(state.term)
+      end
+    end)
 
     {:ok, state}
   end
